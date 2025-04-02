@@ -1,54 +1,34 @@
 ﻿import {
-    keepPreviousData,
-    useQuery,
-    useQueryClient,
-} from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { fetchData } from '../api/movies';
-import { MovieType } from '../types/types';
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect } from "react";
+import { fetchData } from "../api/movies";
 
-export const useDataQuery = <T>(andpoint: string, page?: number) => {
-    const queryClient = useQueryClient();
+export const useDataQuery = <T>(
+  andpoint: string,
+  page?: number,
+  searchQuery: string = ""
+) => {
+  const queryClient = useQueryClient();
 
-    const query = useQuery({
-        queryKey: [andpoint, page],
-        queryFn: () => fetchData<T>(andpoint, page),
-        placeholderData: keepPreviousData,
-        staleTime: 5000,
-    });
+  const query = useQuery({
+    queryKey: [andpoint, page, searchQuery],
+    queryFn: () => fetchData<T>(andpoint, page, searchQuery),
+    placeholderData: keepPreviousData,
+    staleTime: 5000,
+  });
 
-    useEffect(() => {
-        if (!query.isPlaceholderData) {
-            queryClient.prefetchQuery({
-                queryKey: [andpoint, page],
-                queryFn: () => fetchData<T>(andpoint, page),
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query.isPlaceholderData, queryClient]);
+  useEffect(() => {
+    if (!query.isPlaceholderData) {
+      queryClient.prefetchQuery({
+        queryKey: [andpoint, page, searchQuery],
+        queryFn: () => fetchData<T>(andpoint, page, searchQuery),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.isPlaceholderData, queryClient]);
 
-    return query;
-};
-
-export const useMoviesQuery = (page: number) => {
-    const queryClient = useQueryClient();
-
-    const query = useQuery({
-        queryKey: ['movies', page],
-        queryFn: () => fetchData<MovieType>('movies', page),
-        placeholderData: keepPreviousData,
-        staleTime: 5000,
-    });
-
-    useEffect(() => {
-        if (!query.isPlaceholderData) {
-            queryClient.prefetchQuery({
-                queryKey: ['movies', page + 1],
-                queryFn: () => fetchData<MovieType>('movies', page + 1),
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query.isPlaceholderData, queryClient]);
-
-    return query;
+  return query;
 };
